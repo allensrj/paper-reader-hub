@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/icon.png" width="96" alt="paper-reader-hub icon">
+</p>
+
 # paper-reader-hub · 论文知识库学习看板
 
 > 一个装进 [DeepSeek Harness](https://github.com/deepseek-ai) 的论文精读插件：**论文入库 → 多标签精读原版 PDF（AI 翻译 / 划线 / 批注）→ 整篇笔记 → 论文库层面复盘**。
@@ -94,7 +98,7 @@ AI 翻译是否可用，可以看插件宿主的健康接口（浏览器打开�
 
 ```
 http://127.0.0.1:<DSH 端口>/paper-board/api/health
-→ {"ok":true,"tag":"1.2.0","hasKey":true,"engine":"host-llm","provider":"...","model":"..."}
+→ {"ok":true,"tag":"1.2.1","hasKey":true,"engine":"host-llm","provider":"...","model":"..."}
 ```
 
 `hasKey` 为 `true`（兼容旧字段名）表示宿主已经解析到一个可用模型，`provider` / `model` 就是这次要用的那条路由；为 `false` 时 AI 翻译不可用，会自动退回免费引擎。它不再代表「读到了某个 API Key」——模型和凭证都由你已经在用的 DSH 配置提供。
