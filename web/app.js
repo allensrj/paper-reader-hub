@@ -35811,8 +35811,9 @@
 	}
 
 	/**
-	 * AI 翻译：走 DSH 宿主半边的同源接口 /paper-board/api/translate，
-	 * 密钥只留在宿主进程里，浏览器不接触。这是质量最好、也几乎不限流的一条路，
+	 * AI 翻译：走 DSH 宿主半边的同源接口 /paper-board/api/translate。
+	 * 宿主用你已经在用的 DSH 模型（ctx.llm + 设置里选的那个）去翻，
+	 * 插件不另配 key、也不写死模型名。这是质量最好、也几乎不限流的一条路，
 	 * 只有宿主不可用（例如单独用 serve.cjs 调试）时才会落到下面几个免费引擎。
 	 */
 	const AI_ENDPOINT = 'api/translate';
