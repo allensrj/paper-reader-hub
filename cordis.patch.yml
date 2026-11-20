@@ -1,0 +1,5 @@
+# 论文知识库学习看板：宿主半边（/paper-board 静态资源 + AI 翻译接口）。
+# 浏览器半边由 package.json 的 dsh.client 声明加载（lib/client.js）。
+- insert:
+    - id: dsh-paper-board
+      name: dsh-paper-board
