@@ -1,6 +1,6 @@
 {
   "name": "dsh-paper-board",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "论文知识库学习看板：论文库、多标签原版 PDF 精读（AI 翻译 / 划线 / 批注）、整篇笔记、论文库总览。DeepSeek Harness 插件。",
   "type": "module",
   "main": "./lib/index.js",

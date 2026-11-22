@@ -1,6 +1,6 @@
 {
   "meta": {
     "title": "Paper board",
-    "description": "A paper-reading board in the sidebar: import PDFs into a searchable, tagged library, read several papers in tabs on the original pdf.js layout with four-colour highlights, per-sentence comments and whole-paper notes, translate words, selections, pages or the entire document with the model your DSH already runs, and review everything in a sortable overview table with CSV/JSON export. Papers, notes and translation archives stay in this browser. AI translation calls your DSH model, so it spends your tokens; its translate route accepts same-origin requests only."
+    "description": "A paper-reading board in the sidebar: import PDFs into a searchable, tagged library, read several papers in tabs on the original pdf.js layout with four-colour highlights, per-sentence comments and whole-paper notes, translate words, selections, pages or the entire document with the model your DSH already runs, and review everything in a sortable overview table with CSV/JSON export. Papers, notes and translation archives stay in this browser. AI translation calls your DSH model, so it spends your tokens; its translate route goes through the host's own admission check (ctx.connection.requestRejection)."
   }
 }

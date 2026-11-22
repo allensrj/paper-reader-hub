@@ -1,5 +1,5 @@
 // 宿主路由自测：用一个 mock 的 ctx 驱动 lib/index.js，
-// 验证同源鉴权、ctx.llm 翻译路径与静态资源分发。
+// 验证准入（connection.requestRejection + 自写兜底）、ctx.llm 翻译路径与静态资源分发。
 // 运行：node --test test/*.mjs
 import { EventEmitter } from 'node:events'
 import { Writable } from 'node:stream'
@@ -99,6 +99,61 @@ check('路径穿越被挡', r.status === 404 || r.status === 503, 'status=' + r.
 
 r = await call('/paper-board/api/nope', { headers: { host: '127.0.0.1:3000' } })
 check('未知 api 404', r.status === 404)
+
+// ── 有 connection 服务时：以宿主的 requestRejection 为准 ──────────────────────
+{
+  const services2 = {
+    llm: mockLlm,
+    agentDefaultModel: { currentSelection: () => ({ provider: 'test-provider', model: 'test-model' }) },
+    // 模拟宿主：只放行带 x-authed 头的请求，其余 401。
+    connection: { requestRejection: (req) => (req.headers['x-authed'] === '1' ? undefined : 401) },
+  }
+  let reg2 = null
+  const ctx2 = {
+    get: (name) => services2[name],
+    effect: (fn) => fn(),
+    webServer: { register: (route) => { reg2 = route; return () => {} } },
+  }
+  mod.apply(ctx2)
+
+  const call2 = (pathname, { method = 'GET', headers = {}, body } = {}) =>
+    new Promise((resolve, reject) => {
+      const req = new EventEmitter()
+      req.method = method; req.url = pathname; req.headers = headers
+      req[Symbol.asyncIterator] = async function* () { if (body !== undefined) yield Buffer.from(JSON.stringify(body)) }
+      let status = 0; const chunks = []
+      const res = new Writable({
+        write(c, e, cb) { chunks.push(Buffer.from(c)); cb() }, final(cb) { cb() },
+      })
+      res.writeHead = (code) => { status = code }
+      res.on('finish', () => resolve({ status, body: Buffer.concat(chunks).toString('utf8') }))
+      res.on('error', reject)
+      Promise.resolve(reg2.handler(req, res)).catch(reject)
+    })
+
+  let r2 = await call2('/paper-board/api/translate', {
+    method: 'POST',
+    headers: { host: '127.0.0.1:3000', origin: 'http://127.0.0.1:3000' },
+    body: { texts: ['x'] },
+  })
+  check('connection 拒绝时返回 401（即使同源）', r2.status === 401, r2.body)
+
+  r2 = await call2('/paper-board/api/translate', {
+    method: 'POST',
+    headers: { host: '127.0.0.1:3000', origin: 'http://127.0.0.1:3000', 'x-authed': '1' },
+    body: { texts: ['ok'] },
+  })
+  check('connection 放行后翻译成功', JSON.parse(r2.body).ok === true, r2.body)
+
+  // 宿主的放行优先于自写规则：模拟一个「Origin 看起来跨站但宿主已认证」的场景
+  // （远程访问 / 桌面代理会剥头，自写规则会误判）
+  r2 = await call2('/paper-board/api/translate', {
+    method: 'POST',
+    headers: { host: '127.0.0.1:3000', origin: 'http://127.0.0.1', 'x-authed': '1' },
+    body: { texts: ['a'] },
+  })
+  check('connection 放行时不再用自写规则二次否决', JSON.parse(r2.body).ok === true, r2.body)
+}
 
 test('host routes', () => {})
 console.log(out.join('\n'))

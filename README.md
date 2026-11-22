@@ -98,7 +98,7 @@ AI 翻译是否可用，可以看插件宿主的健康接口（浏览器打开�
 
 ```
 http://127.0.0.1:<DSH 端口>/paper-board/api/health
-→ {"ok":true,"tag":"1.2.1","hasKey":true,"engine":"host-llm","provider":"...","model":"..."}
+→ {"ok":true,"tag":"1.2.2","hasKey":true,"engine":"host-llm","provider":"...","model":"..."}
 ```
 
 `hasKey` 为 `true`（兼容旧字段名）表示宿主已经解析到一个可用模型，`provider` / `model` 就是这次要用的那条路由；为 `false` 时 AI 翻译不可用，会自动退回免费引擎。它不再代表「读到了某个 API Key」——模型和凭证都由你已经在用的 DSH 配置提供。
@@ -125,7 +125,7 @@ http://127.0.0.1:<DSH 端口>/paper-board/api/health
 - **AI 翻译消耗的是你自己的 DSH 额度**：一次全文翻译会把整篇论文按批发给模型。模型没配好、额度用尽或调用失败时，这一段会退回免费引擎
 - 整篇译文按「论文 id + 页数」匹配存档，PDF 换了或页数变了会自动重翻
 - 首次加载约 3.4 MB（前端 `app.js` 2.1 MB + pdf.js worker 1.3 MB），之后走浏览器缓存
-- 主区域是 iframe，页面里的 `/paper-board/api/*` 路由只接受同源请求（拒绝跨站调用，因为一次翻译就是一次真实的模型调用）
+- 主区域是 iframe。`/paper-board/api/*` 先过宿主自己的准入（`ctx.connection.requestRejection`，Host/Origin 围栏 + 浏览器会话认证），宿主没有该服务时退回内置的同源校验；一次翻译就是一次真实的模型调用，不该由别的网页或未认证的调用方替用户花掉
 
 ---
 
